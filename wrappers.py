@@ -13,10 +13,8 @@ Amazon Games
 Xbox Store
 """
 from bs4 import BeautifulSoup
-from helper import get_div_text
+from helper import get_div_text, get_div_block
 from wrapper import Wrapper
-
-lista = ["About This Game", "Reviews"]
 
 class SteamWrapper(Wrapper):
 
@@ -27,6 +25,10 @@ class SteamWrapper(Wrapper):
         soup = BeautifulSoup(html_page, "html.parser")
 
         template = {}
+        # details
+        details = soup.find_all("div", class_="details_block")
+        if details:
+            template['details'] = get_div_block(details[2])
         # price
         price = soup.find("div", class_="discount_original_price")
         if price:
@@ -39,10 +41,9 @@ class SteamWrapper(Wrapper):
         reqs_max = soup.find("div", class_="game_area_sys_req_rightCol")
         if reqs_max:
             template['Req_max'] = get_div_text(list(reqs_max.children)[1])
-        # About this game and reviews
+        # About this game
         description = soup.find_all("div", class_="game_area_description")
         if description:
             template['description'] = get_div_text(description[1])
-            template['review'] = get_div_text(description[0])
 
         return template
