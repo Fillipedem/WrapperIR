@@ -28,11 +28,14 @@ class SteamWrapper(Wrapper):
         # details
         details = soup.find_all("div", class_="details_block")
         if details:
-            template['details'] = get_div_block(details[2])
+            for d in details:
+                if "Title" in d.get_text():
+                    template['details'] = get_div_block(d)
+                    break
         # price
-        price = soup.find("div", class_="discount_original_price")
-        if price:
-            template['price'] = price.get_text()
+        #price = soup.find("div", class_="discount_original_price")
+        #if price:
+        #    template['price'] = price.get_text()
         # Requirements min
         reqs_min = soup.find("div", class_="game_area_sys_req_leftCol")
         if reqs_min:
