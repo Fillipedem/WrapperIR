@@ -15,3 +15,7 @@ class Wrapper():
         output: template_dict
         """
         pass
+
+
+game_template = {"title": None, "genre": None, "Req_min": None, "Req_max": None,
+                 "description": None}

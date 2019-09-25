@@ -14,7 +14,7 @@ def get_div_text(tag_div):
 
     return tag_div.get_text()
 
-def get_div_block(tag_div):
+def get_div_dict(tag_div):
     template = {}
     tmp_tag = None
 
@@ -35,3 +35,24 @@ def get_div_block(tag_div):
     #endfor
 
     return template
+
+
+def get_div_table_dict():
+    pass
+
+def get_meta_dict(meta_tags):
+    """
+    Retorna uma lista com os itemprop + content de cada tag meta
+    """
+    meta_dict = {}
+
+    for meta in meta_tags:
+        property = meta.get("itemprop")
+        content = meta.get("content")
+
+        if property not in meta_dict:
+            meta_dict[property] = []
+
+        meta_dict[property].append(content)
+
+    return meta_dict
