@@ -1,13 +1,13 @@
 """
 Wrappers especificos para cada site:
 
-Steam
-Humble Bundle
-Epic Games
+Steam               X
+Nuuvem              X
+Humble Bundle       ?
+Epic Games          ?
 Gamesdeal
 Ubisoft
 GOG
-Nuuvem
 Winstore
 Amazon Games
 Xbox Store
@@ -85,5 +85,39 @@ class NuuvemWrapper(Wrapper):
         description = soup.find_all("div", class_="product-content--text product-content--text__read-more")[0]
         if description:
             template['description'] = description.get_text()
+
+        return template
+
+
+class GamesDealWrapper(Wrapper):
+
+    def __init__(self):
+        pass
+
+    def extract(self, html_page):
+        soup = BeautifulSoup(html_page, "html.parser")
+
+        template = game_template
+
+        # Title
+        title = soup.find("h1")
+        if title:
+            template['title'] = title.get_text()
+
+        # h2_tags
+        h2_tags = soup.find_all("h2")
+
+        if h2_tags:
+
+            for tag in h2_tags:
+                # About this game
+                if "About This Game" in tag.get_text():
+                    p_tag = tag.find_next("p")
+                    template['description'] = p_tag.get_text()
+
+                # Req_min
+                if "System Requirements" in tag.get_text():
+                    ul_tag = tag.find_next("ul")
+                    template['Req_min'] = ul_tag.get_text()
 
         return template
