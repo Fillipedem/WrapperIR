@@ -1,13 +1,17 @@
 from bs4 import BeautifulSoup
-from wrappers import SteamWrapper, NuuvemWrapper, GamesDealWrapper
+from wrappers import SteamWrapper, NuuvemWrapper, GamesDealWrapper, HumbleBundleWrapper
 
-page = "./pages/gamesdeal1.html"
+page = "./pages/hb1.html"
 
 with open(page, "r") as f:
 
     file_page = f.read()
 
-wrapper = GamesDealWrapper()
+
+soup = BeautifulSoup(file_page, "html.parser")
+
+
+wrapper = HumbleBundleWrapper()
 extract = wrapper.extract(file_page)
 
 for t in extract:

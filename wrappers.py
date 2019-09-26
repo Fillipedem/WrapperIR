@@ -119,5 +119,46 @@ class GamesDealWrapper(Wrapper):
                 if "System Requirements" in tag.get_text():
                     ul_tag = tag.find_next("ul")
                     template['Req_min'] = ul_tag.get_text()
+                    break
 
+        return template
+
+
+class HumbleBundleWrapper(Wrapper):
+
+    def __init__(self):
+        pass
+
+    def extract(self, html_page):
+        soup = BeautifulSoup(html_page, "html.parser")
+
+        template = game_template
+
+        # Title
+        title = soup.find_all("h1")
+        if title:
+            template['title'] = title[0].get_text()
+
+        # genre
+        genres_list = []
+
+        for span_tag in soup.find_all('span'):
+
+            if span_tag.get('itemprop') == 'genre':
+                genres_list.append(span_tag.get_text())
+
+        template['genre'] = " ".join(genres_list)
+
+        # requirements
+        reqs_div = soup.find_all("div", class_="js-property-value property-value")
+        if reqs_div:
+            reqs = reqs_div[-1]
+            template['Req_min'] = get_div_text(reqs)
+
+        # About the game
+        for meta_tag in soup.find_all("meta"):
+            if meta_tag.get("itemprop") == "description":
+                template['description'] = meta_tag.get('content')
+
+        # return
         return template
