@@ -3,9 +3,9 @@ Wrappers especificos para cada site:
 
 Steam               X
 Nuuvem              X
-Humble Bundle       ?
+Humble Bundle       X
 Epic Games          ?
-Gamesdeal
+Gamesdeal           X
 Ubisoft
 GOG
 Winstore
@@ -161,4 +161,41 @@ class HumbleBundleWrapper(Wrapper):
                 template['description'] = meta_tag.get('content')
 
         # return
+        return template
+
+
+class UbisoftWrapper(Wrapper):
+
+    def __init__(self):
+        pass
+
+    def extract(self, html_page):
+        soup = BeautifulSoup(html_page, "html.parser")
+
+        template = game_template
+
+        # titles
+        button_tags = soup.find_all("button")
+        if len(button_tags) >= 2:
+            template['title'] = button_tags[1].get('title')
+
+        # genre
+        #span_tags = soup.find_all("span", class_="product-details-info-name")
+        #if span_tags and len(span_tags) >= 4:
+        #
+        # Req_min
+        req_min = soup.find_all('div', class_="section-content requirements-min")
+        if req_min:
+            template['Req_min'] = req_min[0].get_text()
+
+        # Req_max
+        req_max = soup.find_all('div', class_="section-content requirements-rec")
+        if req_max:
+            template['Req_max'] = req_max[0].get_text()
+
+        # description
+        article_tags = soup.find_all('article')
+        if article_tags:
+            template['description'] = article_tags[0].get_text()
+
         return template
