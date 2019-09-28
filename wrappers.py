@@ -6,8 +6,8 @@ Nuuvem              X
 Humble Bundle       X
 Epic Games          ?
 Gamesdeal           X
-Ubisoft
-GOG
+Ubisoft             X
+GOG                 X
 Winstore
 Amazon Games
 Xbox Store
@@ -199,3 +199,59 @@ class UbisoftWrapper(Wrapper):
             template['description'] = article_tags[0].get_text()
 
         return template
+
+
+class GOGWrapper(Wrapper):
+
+    def __init__(self):
+        pass
+
+    def extract(self, html_page):
+        soup = BeautifulSoup(html_page, "html.parser")
+
+        template = game_template
+
+        # title
+        h1_tag  = soup.find_all('h1', class_="productcard-basics__title")
+        if h1_tag:
+            template['title'] = h1_tag[0].get_text()
+
+        # genre
+        details = soup.find_all("a", class_="details__link ng-scope")
+        template['genre'] = []
+        if details:
+            for a_tag in details[:-2]:
+                template['genre'].append(a_tag.get_text())
+
+        # Req_min
+        req_tag = soup.find_all("div", class_="content-summary-section content-summary-offset")
+        if req_tag:
+            req_tag = req_tag[-1]
+            template['Req_min'] = req_tag.get_text()
+
+        # description
+        h4_tags = soup.find_all("h4")
+        if h4_tags:
+            tag = h4_tags[0]
+            description = tag.get_text() + "\n"
+
+            for sib in tag.next_siblings:
+                description = description + "\n" + sib.get_text()
+
+            template['description'] = description
+
+        # return
+        return template
+
+
+
+
+
+
+
+
+
+
+
+
+#
