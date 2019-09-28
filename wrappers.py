@@ -25,15 +25,25 @@ class SteamWrapper(Wrapper):
         soup = BeautifulSoup(html_page, "html.parser")
 
         template = game_template
-        # details
-        details = soup.find_all("div", class_="details_block")
-        if details:
-            for d in details:
-                if "Title" in d.get_text():
-                    tmp = get_div_dict(d)
-                    template['title'] = tmp['Title:'][0]
-                    template['genre'] = tmp['Genre:']
-                    break
+
+        div_tags = soup.find_all("div")
+        for tag in div_tags:
+            if tag.get("class") == ["details_block"]:
+
+                # Title/Genre
+                tmp_tag = get_div_dict(tag)
+                if tmp_tag:
+                    template['title'] = tmp_tag['Title:'][0]
+                    template['genre'] = tmp_tag['Genre:']
+
+                # pub and dev
+                tmp_tag = tag.findAll("div")
+                if tmp_tag:
+                    template['dev'] = get_div_dict(tmp_tag[0])
+                    template['pub'] = get_div_dict(tmp_tag[1])
+
+                # break
+                break
 
         # Requirements min
         reqs_min = soup.find("div", class_="game_area_sys_req_leftCol")
@@ -226,7 +236,7 @@ class GOGWrapper(Wrapper):
         # Req_min
         req_tag = soup.find_all("div", class_="content-summary-section content-summary-offset")
         if req_tag:
-            req_tag = req_tag[-1]
+            req_tag = req_tag[-2]
             template['Req_min'] = req_tag.get_text()
 
         # description
