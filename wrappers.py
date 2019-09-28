@@ -26,6 +26,9 @@ class SteamWrapper(Wrapper):
 
         template = game_template
 
+        # Title/Genre Dev/Pub
+        # O primeiro block div com nome "details_block"
+        # contem os atributos: Title/Genre Dev/Pub
         div_tags = soup.find_all("div")
         for tag in div_tags:
             if tag.get("class") == ["details_block"]:
@@ -43,16 +46,18 @@ class SteamWrapper(Wrapper):
                     template['pub'] = get_div_dict(tmp_tag[1])
 
                 # break
-                break
+                break # Em alguns sites existem oturos blocks "details_blocks" que deve ser ignorado
 
         # Requirements min
         reqs_min = soup.find("div", class_="game_area_sys_req_leftCol")
         if reqs_min:
             template['Req_min'] = get_div_text(list(reqs_min.children)[1])
+
         # Requirements max
         reqs_max = soup.find("div", class_="game_area_sys_req_rightCol")
         if reqs_max:
             template['Req_max'] = get_div_text(list(reqs_max.children)[1])
+
         # About this game
         description = soup.find_all("div", class_="game_area_description")
         if description:
