@@ -16,6 +16,7 @@ from bs4 import BeautifulSoup
 from helper import get_div_text, get_div_dict, get_meta_dict, \
                     get_children_tags, get_navigable_strings
 from wrapper import Wrapper, game_template
+import json
 
 class SteamWrapper(Wrapper):
 
@@ -259,29 +260,28 @@ class GOGWrapper(Wrapper):
         if h1_tag:
             template['title'] = h1_tag[0].get_text()
 
-        # genre
+        # dev/pub/genre
         details = soup.find_all("a", class_="details__link ng-scope")
-        template['genre'] = []
+
         if details:
-            for a_tag in details[:-2]:
-                template['genre'].append(a_tag.get_text())
+
+            for a_tag in details:
+                if "Publisher" in a_tag.get("gog-track-event"):
+                    template['pub'].append(a_tag.get_text())
+                elif "Developer" in a_tag.get("gog-track-event"):
+                    template['dev'].append(a_tag.get_text())
+                else:
+                    template['genre'].append(a_tag.get_text())
 
         # Req_min
-        req_tag = soup.find_all("div", class_="content-summary-section content-summary-offset")
+        req_tag = soup.find_all("div", class_="system-requirements")
         if req_tag:
-            req_tag = req_tag[-2]
-            template['Req_min'] = req_tag.get_text()
+            template['Req_min'] = req_tag[0].get_text()
 
         # description
-        h4_tags = soup.find_all("h4")
-        if h4_tags:
-            tag = h4_tags[0]
-            description = tag.get_text() + "\n"
-
-            for sib in tag.next_siblings:
-                description = description + "\n" + sib.get_text()
-
-            template['description'] = description
+        description = soup.find_all("div", class_="description")
+        if description:
+            template['description'] = description[0].get_text()
 
         # return
         return template
