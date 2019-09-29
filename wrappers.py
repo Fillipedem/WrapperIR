@@ -16,7 +16,57 @@ from bs4 import BeautifulSoup
 from helper import get_div_text, get_div_dict, get_meta_dict, \
                     get_children_tags, get_navigable_strings
 from wrapper import Wrapper, game_template
+from py_common_subseq import find_common_subsequences
 import json
+
+
+class GenericWrapper(Wrapper):
+
+    def __init__(self):
+        pass
+
+    def extract(self, html_page):
+        soup = BeautifulSoup(html_page, "html.parser")
+
+        template = game_template.copy()
+
+        # find title
+        h1_tags = soup.find_all("h1")
+
+        if h1_tags:
+            title = h1_tags[0].get_text().strip()
+
+            template['title'] = title.split("Buy ")[-1]
+
+
+        # !!game details!!
+        """
+        div_tags = soup.find_all("div")
+        for tag in div_tags:
+            if "details" in tag.get_text().lower() :
+                for tag_a in tag.find_all("a"):
+                    print(tag_a.get_text())
+        """
+
+        # Requirements
+        #desc = soup.find_all("div", "description")
+
+
+        # About the game
+        h2_tags = soup.find_all("h2")
+
+        for tag in h2_tags:
+
+
+            tag_text = tag.get_text().lower()
+
+            if "about" in tag_text or "description" in tag_text:
+                parent = tag.parent
+
+                template["description"] = parent.get_text().split("System Requirements")[0]
+
+        return template
+
 
 class SteamWrapper(Wrapper):
 
