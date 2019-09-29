@@ -1,7 +1,8 @@
 from bs4 import BeautifulSoup
-from wrappers import SteamWrapper, NuuvemWrapper, GamesDealWrapper, HumbleBundleWrapper, UbisoftWrapper, GOGWrapper
+from wrappers import SteamWrapper, NuuvemWrapper, GamesDealWrapper, \
+                    HumbleBundleWrapper, UbisoftWrapper, GOGWrapper
 
-page = "./pages/steam2.html"
+page = "./pages/hb2.html"
 
 with open(page, "r") as f:
 
@@ -11,7 +12,7 @@ with open(page, "r") as f:
 soup = BeautifulSoup(file_page, "html.parser")
 
 
-wrapper = SteamWrapper()
+wrapper = HumbleBundleWrapper()
 extract = wrapper.extract(file_page)
 
 for t in extract:

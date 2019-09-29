@@ -56,3 +56,16 @@ def get_meta_dict(meta_tags):
         meta_dict[property].append(content)
 
     return meta_dict
+
+
+def get_children_tags(tag, children_tag):
+    """
+    Retorna a lista com as strings de todas as tags iguais a children_tag
+    """
+    ans = []
+
+    tags = tag.find_all(children_tag)
+    for tag in tags:
+        ans.append(tag.get_text())
+
+    return ans

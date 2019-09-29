@@ -185,9 +185,9 @@ class HumbleBundleWrapper(Wrapper):
             template['pub'] = get_children_tags(pub_tags[0], 'a')
 
         # requirements
-        reqs_div = soup.find_all("div", class_="js-property-value property-value")
+        reqs_div = soup.find_all("div", class_="property-view system_requirements-view expandable js-admin-edit collapsed")
         if reqs_div:
-            reqs = reqs_div[-1]
+            reqs = list(reqs_div[0])[0]
             template['Req_min'] = get_div_text(reqs)
 
         # About the game
