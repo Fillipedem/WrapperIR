@@ -54,16 +54,23 @@ class GenericWrapper(Wrapper):
 
         # About the game
         h2_tags = soup.find_all("h2")
+        h3_tags = soup.find_all("h3")
 
-        for tag in h2_tags:
-
-
+        for tag in h2_tags + h3_tags:
+            parent = tag.parent
             tag_text = tag.get_text().lower()
 
-            if "about" in tag_text or "description" in tag_text:
-                parent = tag.parent
+            for text in ["about the game", "about this game",
+                        "sobre este jogo", "description"]:
+                if text in tag_text:
+                    desc_text =  parent.get_text()
+                    desc_text = desc_text.split("System Requirements")[0]
+                    template["description"] = desc_text
 
-                template["description"] = parent.get_text().split("System Requirements")[0]
+        if not template['description']:
+            div_tag = soup.find_all("div", "description")
+            if div_tag:
+                template['description'] = div_tag[0].get_text()
 
         return template
 
