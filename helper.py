@@ -14,6 +14,7 @@ def get_div_text(tag_div):
 
     return tag_div.get_text()
 
+
 def get_div_dict(tag_div):
     template = {}
     tmp_tag = None
@@ -36,9 +37,6 @@ def get_div_dict(tag_div):
 
     return template
 
-
-def get_div_table_dict():
-    pass
 
 def get_meta_dict(meta_tags):
     """
@@ -67,5 +65,22 @@ def get_children_tags(tag, children_tag):
     tags = tag.find_all(children_tag)
     for tag in tags:
         ans.append(tag.get_text())
+
+    return ans
+
+
+def get_navigable_strings(tag):
+    """
+    Returns all NavigableStrings from the tag children_tag
+
+    input: bs Tag
+    output: str list
+    """
+    ans = []
+    children = list(tag.children)
+
+    for c in children:
+        if isinstance(c, NavigableString) and c != "\n":
+            ans.append(c.strip())
 
     return ans

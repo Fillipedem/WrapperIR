@@ -13,7 +13,8 @@ Amazon Games
 Xbox Store
 """
 from bs4 import BeautifulSoup
-from helper import get_div_text, get_div_dict, get_meta_dict, get_children_tags
+from helper import get_div_text, get_div_dict, get_meta_dict, \
+                    get_children_tags, get_navigable_strings
 from wrapper import Wrapper, game_template
 
 class SteamWrapper(Wrapper):
@@ -214,10 +215,17 @@ class UbisoftWrapper(Wrapper):
         if len(button_tags) >= 2:
             template['title'] = button_tags[1].get('title')
 
-        # genre
-        #span_tags = soup.find_all("span", class_="product-details-info-name")
-        #if span_tags and len(span_tags) >= 4:
-        #
+        # genre/dev/pub
+        span_tags = soup.find_all("span", class_="product-details-info-name")
+        if span_tags and len(span_tags) >= 6:
+            genre = span_tags[3].parent
+            dev = span_tags[5].parent
+            pub = span_tags[4].parent
+
+            template['genre'] = get_navigable_strings(genre)
+            template['pub'] = get_navigable_strings(pub)
+            template['dev'] = get_navigable_strings(dev)
+
         # Req_min
         req_min = soup.find_all('div', class_="section-content requirements-min")
         if req_min:
