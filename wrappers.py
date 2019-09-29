@@ -89,6 +89,14 @@ class NuuvemWrapper(Wrapper):
         if 'genre' in meta_dict:
             template['genre'] = meta_dict['genre'][0]
 
+        # dev/pub
+        for tag in soup.find_all("strong"):
+            if tag.get_text() == "Developer:":
+                template['dev'] = tag.next_sibling
+
+            if tag.get_text() == "Publisher:":
+                template['pub'] = tag.next_sibling
+        
         # reqs_min and max
         requirements = soup.find_all("div", class_="product-system-requirements--item--content")
 
