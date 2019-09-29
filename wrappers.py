@@ -13,7 +13,7 @@ Amazon Games
 Xbox Store
 """
 from bs4 import BeautifulSoup
-from helper import get_div_text, get_div_dict, get_meta_dict
+from helper import get_div_text, get_div_dict, get_meta_dict, get_children_tags
 from wrapper import Wrapper, game_template
 
 class SteamWrapper(Wrapper):
@@ -96,7 +96,7 @@ class NuuvemWrapper(Wrapper):
 
             if tag.get_text() == "Publisher:":
                 template['pub'] = tag.next_sibling
-        
+
         # reqs_min and max
         requirements = soup.find_all("div", class_="product-system-requirements--item--content")
 
@@ -170,7 +170,19 @@ class HumbleBundleWrapper(Wrapper):
             if span_tag.get('itemprop') == 'genre':
                 genres_list.append(span_tag.get_text())
 
-        template['genre'] = " ".join(genres_list)
+        template['genre'] = genres_list
+
+        # dev
+        dev_tags = soup.find_all("div", class_="property-view developers-view js-admin-edit")
+        if dev_tags:
+
+            template['dev'] = get_children_tags(dev_tags[0], 'a')
+
+        # pub
+        pub_tags = soup.find_all("div", class_="property-view publishers-view js-admin-edit")
+        if pub_tags:
+
+            template['pub'] = get_children_tags(pub_tags[0], 'a')
 
         # requirements
         reqs_div = soup.find_all("div", class_="js-property-value property-value")

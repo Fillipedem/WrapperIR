@@ -17,6 +17,5 @@ class Wrapper():
         pass
 
 
-game_template = {"title": None, "genre": None, "Req_min": None,
-                "pub": None, "dev": None, "Req_max": None,
-                "description": None}
+game_template = {"title": None, "genre": [], "pub": [], "dev": [],
+                 "Req_max": None, "Req_min": None, "description": None}
