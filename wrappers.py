@@ -10,13 +10,15 @@ Ubisoft             X
 GOG                 X
 Winstore
 Amazon Games
-Xbox Store
 """
+import bs4
 from bs4 import BeautifulSoup
 from helper import get_div_text, get_div_dict, get_meta_dict, \
-                    get_children_tags, get_navigable_strings
+                    get_children_tags, get_navigable_strings, \
+                    get_from_list
 from wrapper import Wrapper, game_template
 from py_common_subseq import find_common_subsequences
+from copy import deepcopy
 import json
 
 
@@ -28,7 +30,7 @@ class GenericWrapper(Wrapper):
     def extract(self, html_page):
         soup = BeautifulSoup(html_page, "html.parser")
 
-        template = game_template.copy()
+        template = deepcopy(game_template)
 
         # find title
         h1_tags = soup.find_all("h1")
@@ -38,18 +40,22 @@ class GenericWrapper(Wrapper):
 
             template['title'] = title.split("Buy ")[-1]
 
+        # genre dev pub
+        all_tags = soup.find_all()
+        for idx, tag in enumerate(all_tags):
+            tag_text = tag.get_text().lower()
 
-        # !!game details!!
-        """
-        div_tags = soup.find_all("div")
-        for tag in div_tags:
-            if "details" in tag.get_text().lower() :
-                for tag_a in tag.find_all("a"):
-                    print(tag_a.get_text())
-        """
+            #genre
+            if tag_text in ["genre:", "genre", "tipo", "category/genre"]:
+                template['genre'] = get_from_list(idx, all_tags, tag_text)
 
-        # Requirements
-        #desc = soup.find_all("div", "description")
+            #dev
+            if tag_text in ["developer:", "developer", "desenvolvedor", "company:"]:
+                template['dev'] = get_from_list(idx, all_tags, tag_text)
+
+            #pub
+            if tag_text in ["publisher:", "publisher", "destribuidora", "company:"]:
+                template['pub'] = get_from_list(idx, all_tags, tag_text,)
 
 
         # About the game
@@ -83,7 +89,7 @@ class SteamWrapper(Wrapper):
     def extract(self, html_page):
         soup = BeautifulSoup(html_page, "html.parser")
 
-        template = game_template
+        template = deepcopy(game_template)
 
         # Title/Genre Dev/Pub
         # O primeiro block div com nome "details_block"
@@ -96,7 +102,7 @@ class SteamWrapper(Wrapper):
                 tmp_tag = get_div_dict(tag)
                 if tmp_tag:
                     template['title'] = tmp_tag['Title:'][0]
-                    template['genre'] = tmp_tag['Genre:']
+                    template['genre'] = tmp_tag['Genre:'].split(",")
 
                 # pub and dev
                 tmp_tag = tag.findAll("div")
@@ -134,7 +140,7 @@ class NuuvemWrapper(Wrapper):
     def extract(self, html_page):
         soup = BeautifulSoup(html_page, "html.parser")
 
-        template = game_template
+        template = deepcopy(game_template)
 
         # meta tags
         meta_tags = soup.find_all("meta")
@@ -146,15 +152,17 @@ class NuuvemWrapper(Wrapper):
 
         # genre
         if 'genre' in meta_dict:
-            template['genre'] = meta_dict['genre'][0]
+            genre = meta_dict['genre'][0].split(',')
+            genre = [g.strip() for g in genre]
+            template['genre'] = genre
 
         # dev/pub
         for tag in soup.find_all("strong"):
             if tag.get_text() == "Developer:":
-                template['dev'] = tag.next_sibling
+                template['dev'] = [tag.next_sibling.strip()]
 
             if tag.get_text() == "Publisher:":
-                template['pub'] = tag.next_sibling
+                template['pub'] = [tag.next_sibling.strip()]
 
         # reqs_min and max
         requirements = soup.find_all("div", class_="product-system-requirements--item--content")
@@ -179,7 +187,7 @@ class GamesDealWrapper(Wrapper):
     def extract(self, html_page):
         soup = BeautifulSoup(html_page, "html.parser")
 
-        template = game_template
+        template = deepcopy(game_template)
 
         # Title
         title = soup.find("h1")
@@ -214,7 +222,7 @@ class HumbleBundleWrapper(Wrapper):
     def extract(self, html_page):
         soup = BeautifulSoup(html_page, "html.parser")
 
-        template = game_template
+        template = deepcopy(game_template)
 
         # Title
         title = soup.find_all("h1")
@@ -266,7 +274,7 @@ class UbisoftWrapper(Wrapper):
     def extract(self, html_page):
         soup = BeautifulSoup(html_page, "html.parser")
 
-        template = game_template
+        template = deepcopy(game_template)
 
         # titles
         button_tags = soup.find_all("button")
@@ -310,7 +318,7 @@ class GOGWrapper(Wrapper):
     def extract(self, html_page):
         soup = BeautifulSoup(html_page, "html.parser")
 
-        template = game_template
+        template = deepcopy(game_template)
 
         # title
         h1_tag  = soup.find_all('h1', class_="productcard-basics__title")
@@ -342,6 +350,65 @@ class GOGWrapper(Wrapper):
 
         # return
         return template
+
+
+class EpicWrapper(Wrapper):
+
+    def __init__(self):
+        pass
+
+    def extract(self, html_page):
+        soup = BeautifulSoup(html_page, "html.parser")
+
+        template = deepcopy(game_template)
+
+        # title
+        h1_tags = soup.find_all("h1")
+        if h1_tags:
+            template['title'] = h1_tags[0].get_text()
+
+        # genre/dev/pub
+        span_tags = soup.find_all("span")
+        template['Req_min'] = ""
+        for tag in span_tags:
+            tag_text = tag.get_text().lower()
+
+            if tag_text == "tags":
+                genres = tag.next_sibling.find_all("span")
+                genres = [g.get_text() for g in genres]
+                template['genre'] = genres
+
+            if tag_text == "developer":
+                template['dev'].append(tag.next_sibling.get_text())
+
+            if tag_text == "publisher":
+                template['pub'].append(tag.next_sibling.get_text())
+
+            # req
+            class_ = tag.get('class')
+            if class_:
+
+                if "systemrequirements" in class_[0].lower():
+                    template['Req_min'] += tag.get_text() + "\n"
+
+        # description
+        div_tags = soup.find_all("div")
+        template['description'] = ""
+
+        for tag in div_tags:
+            class_ = tag.get('class')
+
+            if class_:
+                class_text = class_[0].lower()
+
+                if "markdown-paragraph" in class_text:
+                    template['description'] += tag.get_text() + "\n"
+
+        return template
+
+
+class WinStoreWrapper(Wrapper):
+    pass
 
 
 

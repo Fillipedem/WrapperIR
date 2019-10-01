@@ -2,6 +2,7 @@
 Funções de ajuda para a extração
 """
 from bs4 import NavigableString
+import re
 
 def get_div_text(tag_div):
     """
@@ -82,5 +83,27 @@ def get_navigable_strings(tag):
     for c in children:
         if isinstance(c, NavigableString) and c != "\n":
             ans.append(c.strip())
+
+    return ans
+
+
+def get_from_list(idx, all_tags, tag_text):
+    ans = []
+    split = lambda x: re.split('\n|,|-', x)
+
+    tmp = all_tags[idx].next_sibling
+    if isinstance(tmp, NavigableString) and len(tmp) >= 2:
+        return [tmp.strip()]
+
+    tmp = all_tags[idx + 1]
+    if tmp.name == "div":
+        ans = get_div_text(tmp)
+    else:
+        ans = tmp.get_text()
+
+    # ajeitando nomes
+    ans = split(ans)
+    ans = [x for x in ans if len(x) > 1]
+    ans = [word.strip() for word in ans]
 
     return ans
