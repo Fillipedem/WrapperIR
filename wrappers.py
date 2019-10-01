@@ -4,11 +4,11 @@ Wrappers especificos para cada site:
 Steam               X
 Nuuvem              X
 Humble Bundle       X
-Epic Games          ?
+Epic Games          X
 Gamesdeal           X
 Ubisoft             X
 GOG                 X
-Winstore
+WinGameStore        X
 Amazon Games
 """
 import bs4
@@ -408,10 +408,50 @@ class EpicWrapper(Wrapper):
 
 
 class WinStoreWrapper(Wrapper):
-    pass
+
+    def __init__(self):
+        pass
 
 
+    def extract(self, html_page):
+        soup = BeautifulSoup(html_page, "html.parser")
 
+        template = deepcopy(game_template)
+
+        # title
+        h2_tags = soup.find_all("h2")
+        if h2_tags:
+            template['title'] = h2_tags[0].get_text()
+
+
+        # genre/dev/pub
+        th_tags = soup.find_all("th")
+        for tag in th_tags:
+            tag_text = tag.get_text().lower()
+
+            if tag_text == "genre":
+                parent = tag.parent
+                template['genre'] = get_children_tags(parent, "a")
+
+            if tag_text == "developer":
+                parent = tag.parent
+                template['dev'] = get_children_tags(parent, "a")
+
+            if tag_text == "publisher":
+                parent = tag.parent
+                template['pub'] = get_children_tags(parent, "a")
+
+        # Req_min
+        req_min = soup.find_all("div", id="detail-sysreqs")
+        if req_min:
+            template['Req_min'] = req_min[0].get_text()
+
+        # description
+        description = soup.find_all("div", id="main-description")
+        if description:
+            template['description'] = description[0].get_text()
+
+        return template
 
 
 
